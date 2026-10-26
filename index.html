@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanteenHub | Campus food ordering</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root{--accent:#777b7e;--soft:#eef0f1}
+    .primary,.menu-jump,.logo>span,.mark,.header nav i,.categories .active{background:#777b7e!important;border-color:#777b7e!important}
+    .primary:hover,.menu-jump:hover{background:#4d465c!important;border-color:#4d465c!important}
+    .eyebrow,.back,.hero h1 em,.add,.times .selected,.pay.selected{color:#777b7e!important}
+    .add{background:#f0edf5!important;border-color:#d5cfdf!important}.add:hover{background:#e5dfed!important}
+    .times .selected,.pay.selected,.pickupbox{background:#eef0f1!important;border-color:#777b7e!important}
+    .menu-jump{box-shadow:0 4px 12px #777b7e44!important}.rec{background:#e9ebec!important;color:#777b7e!important}
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="logo" onclick="showPage('home')"><span>CH</span><div><b>CanteenHub</b><small>Smart College Canteen</small></div></div>
+  <nav id="nav" class="hidden">
+    <button data-page="home" onclick="goToMenu()">Menu</button>
+    <button data-page="orders" onclick="showPage('orders')">My orders</button>
+    <button data-page="cart" onclick="showPage('cart')">Cart <i id="cartCount">0</i></button>
+  </nav>
+</header>
+
+<main>
+<section id="login" class="page active">
+  <div class="login-wrap">
+    <div class="hero">
+      <span class="pill">COLLEGE CANTEEN</span>
+      <h1>Skip the queue.<br><em>Enjoy your break.</em></h1>
+      <p>View today's availability, order in advance, choose your pickup time and collect when ready.</p>
+      <div class="feature"><b>Live availability</b><small>See what is still being served before you walk over.</small></div>
+      <div class="feature"><b>Pickup that fits your break</b><small>Choose a time and collect from the marked counter.</small></div>
+      <div class="feature"><b>Simple, transparent checkout</b><small>Pay online or at the counter. No hidden charges.</small></div>
+    </div>
+    <div class="login-card">
+      <div class="mark">CH</div>
+      <h2>Welcome to CanteenHub</h2><p>Login to start ordering</p>
+      <label>College Email / Student ID</label><input value="renuka15" placeholder="Student ID">
+      <label>Password</label><input value="123456" type="password" placeholder="Password">
+      <button class="primary full" onclick="login()">Login</button>
+      <small class="center">Prototype — any credentials work</small>
+    </div>
+  </div>
+</section>
+
+<section id="home" class="page">
+ <div class="container">
+  <div class="welcome"><div><span class="eyebrow">MONDAY, 23 OCTOBER</span><h1>Good afternoon, Renuka</h1><p>Order ahead and collect during your break.</p></div><span class="open"><i></i> Open until 4:30 PM</span></div>
+  <div class="filters">
+    <label class="searchbox"><span>⌕</span><input id="search" oninput="renderMenu()" placeholder="Search the menu"></label>
+    <select id="budget" onchange="renderMenu()"><option value="999">All Prices</option><option value="30">Under ₹30</option><option value="50">Under ₹50</option><option value="70">Under ₹70</option></select>
+    <select id="period" onchange="renderMenu()"><option value="all">All Day</option><option value="breakfast">Breakfast</option><option value="lunch">Lunch</option><option value="snacks">Snacks</option></select>
+  </div>
+  <div class="categories">
+    <button class="active" onclick="setCat('all',this)">Everything</button><button onclick="setCat('breakfast',this)">Breakfast</button><button onclick="setCat('meals',this)">Meals</button><button onclick="setCat('snacks',this)">Snacks</button><button onclick="setCat('beverages',this)">Drinks</button>
+  </div>
+  <div id="recommendationSection" class="recommendations" hidden>
+    <div class="section-title"><div><span class="rec">POPULAR TODAY</span><h2>Recommendations</h2><p>Popular choices that are ready to order now.</p></div></div>
+    <div id="recommended" class="grid"></div>
+  </div>
+  <div id="menuSection" class="section-title gap menu-heading"><div><h2>Full menu</h2><p>Freshly prepared in small batches. Availability can change during service.</p></div><button class="menu-jump" onclick="toggleRecommendations()">View recommendations ↑</button></div>
+  <div id="menu" class="grid"></div>
+ </div>
+</section>
+
+<section id="cart" class="page"><div class="container narrow">
+ <button class="back" onclick="showPage('home')">← Continue Shopping</button>
+ <h1>Your Cart</h1><p class="sub">Review your items before checkout.</p>
+ <div class="two"><div id="cartItems"></div><aside class="panel"><h3>Order Summary</h3><div class="row"><span>Subtotal</span><b id="subtotal">₹0</b></div><div class="row"><span>Service Charge</span><b>₹0</b></div><hr><div class="row total"><span>Total</span><b id="cartTotal">₹0</b></div><button class="primary full" onclick="goCheckout()">Proceed to Checkout →</button></aside></div>
+</div></section>
+
+<section id="checkout" class="page"><div class="container narrow">
+ <button class="back" onclick="showPage('cart')">← Back to Cart</button>
+ <h1>Checkout</h1><p class="sub">Choose your pickup time and payment method.</p>
+ <div class="two">
+  <div>
+   <div class="panel block"><h3>1 &nbsp; Select Requested Pickup Time</h3><p>Your requested time will be validated by the canteen.</p>
+    <div id="times" class="times"></div>
+    <label class="custom-time">Need another time?
+      <input id="customTime" type="time" min="08:00" max="17:00" onchange="customPickup(this)">
+      <small>Choose a time after now, between 8:00 AM and 5:00 PM.</small>
+    </label>
+   </div>
+   <div class="panel block"><h3>2 &nbsp; Payment Method</h3>
+    <label class="pay"><input type="radio" name="payment" value="Pay Online" onchange="paySelect(this)"> <span><b>Pay Online</b><small>Pay online; OTP verification at pickup.</small></span></label>
+    <label class="pay"><input type="radio" name="payment" value="Pay at Counter" onchange="paySelect(this)"> <span><b>Pay at Counter</b><small>Pay when you collect your food.</small></span></label>
+   </div>
+  </div>
+  <aside class="panel"><h3>Your Order</h3><div id="checkoutItems"></div><hr><div class="row total"><span>Total</span><b id="checkoutTotal">₹0</b></div><div class="pickupbox"><span>Requested Pickup</span><b id="pickupDisplay">12:30 PM</b></div><button class="primary full" onclick="placeOrder()">Place Order</button></aside>
+ </div>
+</div></section>
+
+<section id="success" class="page"><div class="success">
+ <div class="check">✓</div><span class="eyebrow">ORDER PLACED</span><h1>Order received!</h1><p>Your order has been sent to the canteen for confirmation.</p>
+ <div class="orderbox"><small>Your Order Number</small><strong id="orderNo">CH1024</strong><small>Keep this number for tracking</small></div>
+ <div class="successgrid"><div><small>Requested Pickup</small><b id="sPickup"></b></div><div><small>Payment</small><b id="sPayment"></b></div><div><small>Total</small><b id="sTotal"></b></div></div>
+ <p class="notice">⏱ Waiting for canteen confirmation of your requested pickup time.</p>
+ <button class="primary" onclick="showPage('orders')">Track My Order →</button> <button class="secondary" onclick="newOrder()">Back to Menu</button>
+</div></section>
+
+<section id="orders" class="page"><div class="container narrow">
+ <button class="back" onclick="showPage('home')">← Back to Home</button><br><span class="eyebrow">ORDER TRACKING</span><h1 id="trackNo">Order</h1><p class="sub">Track the progress of your canteen order.</p>
+ <div id="noOrderMessage" class="no-order-message"><b>No active order yet</b><p>Your placed orders will appear here with pickup and preparation updates.</p><button class="secondary" onclick="showPage('home')">Browse menu</button></div>
+ <div id="trackingLayout" class="two">
+  <div class="panel"><div class="statushead"><div><small>Current Status</small><h2 id="currentStatus">Preparing</h2></div><span id="badge" class="open">Preparing</span></div>
+   <div id="steps" class="steps">
+    <div class="step done"><i>✓</i><div><b>Order Placed</b><small>Your order was received.</small></div></div>
+    <div class="step done"><i>✓</i><div><b>Accepted</b><small>Canteen confirmed your pickup time.</small></div></div>
+    <div class="step current"><i>3</i><div><b>Preparing</b><small>Your food is being prepared.</small></div></div>
+    <div class="step"><i>4</i><div><b>Ready</b><small>You will be notified when ready.</small></div></div>
+    <div class="step"><i>5</i><div><b>Completed</b><small>Pickup verification completed.</small></div></div>
+   </div>
+   <button id="readyBtn" class="demo" onclick="markReady()">Demo: Mark Order Ready</button>
+  </div>
+  <aside class="panel"><h3>Order Details</h3><div class="row"><span>Pickup</span><b id="tPickup"></b></div><div class="row"><span>Payment</span><b id="tPayment"></b></div><div class="row"><span>Total</span><b id="tTotal"></b></div><hr><div id="trackItems"></div></aside>
+ </div>
+</div></section>
+</main>
+
+<div id="readyModal" class="modal"><div class="modal-card"><div class="bell">🔔</div><h2>Your order is ready!</h2><p>Collect it from the canteen counter.</p><button class="primary full" onclick="imHere()">I'm Here</button><button class="secondary full" onclick="closeReady()">Close</button></div></div>
+<div id="otpModal" class="modal"><div class="modal-card"><span class="eyebrow">PICKUP VERIFICATION</span><h2>Your Pickup OTP</h2><p>Show this OTP to canteen staff.</p><div class="otp">4821</div><button class="primary full" onclick="completeOrder()">Demo: Verify OTP</button></div></div>
+<div id="toast" class="toast"></div>
+<script src="script.js"></script>
+</body></html>
